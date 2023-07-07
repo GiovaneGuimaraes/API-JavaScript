@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script type="text/javascript" src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+    <div class="cabeçalho">
+        <h1>Loja IFSP</h1>
+    </div>
+    <div class="formulario">
+        <form>
+            <label class="nome_escrito">Nome do produto</label>
+            <input id="nome" type="text">
+            <label class="preço_escrito">Preço do produto</label>
+            <input id="preço" step=".01" type="number">
+            <label class="descrição_escrito">Descrição do produto</label>
+            <textarea id="descrição"></textarea>
+            <button id="cadastrar">Cadastrar</button>
+        </form>
+    </div>
+
+    <div>
+        <table id="tabela">
+            <thead>
+                <tr>
+                    <th>Nome</th>
+                    <th>Preço</th>
+                    <th>Opções</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+
+        </table>
+    </div>
+
+    <div class="edição"></div>
+    
+    <script>
+        listar()
+        let botão = $("#cadastrar").click(cadastrar)
+        
+        function cadastrar(){
+            var nome = $("#nome").val()
+            var preço = $("#preço").val()
+            var descrição = $("#descrição").val()
+
+            $.ajax({
+                url: 'https://banco-dados-teste.glitch.me/api/produtos',
+                type:'POST',
+                data:{
+                    "title": nome,
+                    "price": preço,
+                    "description": descrição,
+                },
+
+                success: function(){
+                    alert("Produto cadastrado!")
+                    title = $("#nome").val("")
+                    price =$("#preço").val("")
+                    description = $("#descrição").val("")
+                    listar()
+                },
+                error: function(){
+                    alert("ERROR 404")
+                }
+            })
+            alert('AGUARDE')
+        }
+
+        function listar(){
+            let tbody = $("tbody").empty()
+            let edição = $(".edição").empty()
+            $.getJSON('https://banco-dados-teste.glitch.me/api/produtos',function(produtos_cadastrados){
+                for(let i =0; i<produtos_cadastrados.length;i++){
+                    var caixa_nome = $("<td>").text(produtos_cadastrados[i].title)
+                    var caixa_preço = $("<td>").text(produtos_cadastrados[i].price)
+                    var editar = $("<button>").attr("class", "botão_exibir").text("Exibir").css("background-color","green").css("color","white").css("cursor","pointer").click(cria_div_edição)
+                    var excluir = $("<button>").attr("class","botão_excluir").text("Excluir").css("background-color","red").css("color","white").css("cursor","pointer").click(excluir_func)
+                    let linha = $("<tr>").append(caixa_nome).append(caixa_preço).append(editar).append(excluir)
+                    tbody.append(linha)
+                }
+            })
+        }
+
+        function cria_div_edição(){
+            let divedição = $(".edição")
+            let seleciona = $(this).parent().index() //achar a posição do malandro
+            //console.log(seleciona)
+
+            $.getJSON('https://banco-dados-teste.glitch.me/api/produtos',function(selecionadasso){
+                var id = selecionadasso[seleciona]._id
+                console.log(id)
+                $.getJSON(`https://banco-dados-teste.glitch.me/api/produtos/${id}`,function(mudatudo){
+                    let formulario_edit = $("<form>")
+                    let label_novonome = $("<label>").attr("id","label_novo_nome").text("Nome do produto")
+                    let input_novonome = $("<input>").attr("type","text").attr("id","input_novo_nome").val(mudatudo.title)
+                    let label_novopreço = $("<label>").attr("id","label_novo_preço").text("Preço do produto")
+                    let input_novopreço = $("<input>").attr("type","number").attr("step","0.01").attr("id", "input_novo_preço").val(mudatudo.price)
+                    let label_novadescrição = $("<label>").attr("id","label_nova_descricao").text("Descrição do produto")
+                    let caixa_novadescrição = $("<textarea>").attr("id","caixa_nova_descrição").val(mudatudo.description)
+                    let id_text = $("<label>").attr("class","id_selecionado").text(mudatudo._id)    
+                    var botao_editar = $("<button>").attr("class","botão_editar").text("Editar").click(editar_func)
+                    formulario_edit.append(label_novonome).append(input_novonome).append(label_novopreço).append(input_novopreço).append(label_novadescrição).append(caixa_novadescrição).append(id_text).append(botao_editar)
+                    divedição.append(formulario_edit)
+                    })
+            })
+        }
+
+        function editar_func(){
+            event.preventDefault()
+            let idd = $(".id_selecionado").text()
+            console.log(idd)
+            let nome = $("#input_novo_nome").val()
+            console.log(nome)
+            let preço = $("#input_novo_preço").val()
+            console.log(preço)
+            let descrição = $("#caixa_nova_descrição").val()
+            console.log(descrição)
+
+            $.ajax({
+                url: `https://banco-dados-teste.glitch.me/api/produtos/${idd}`,
+                type:'PUT',
+                data: {
+                    "title": nome,
+                    "price": preço,
+                    "description": descrição,
+                },
+                success: function(){
+                    alert("Produto atualizado")
+                    listar()
+                },
+                erro: function(){
+                    alert("ERROR 404")
+                }
+            })
+        }
+
+        function excluir_func(){
+            let seleciona = $(this).parent().index()
+            //console.log(seleciona)
+            $.getJSON('https://banco-dados-teste.glitch.me/api/produtos',function(remove){
+                var id_selecionado = remove[seleciona]._id
+                //console.log(id_selecionado)
+                var nome_selecionado = remove[seleciona].title
+                //console.log(nome_selecionado)
+                var preço_selecionado = remove[seleciona].price
+                var descrição_selecionada = remove[seleciona].description
+
+                $.ajax({
+                    url:`https://banco-dados-teste.glitch.me/api/produtos/${id_selecionado}`,
+                    type: 'DELETE',
+                    data:{
+                        "_id": id_selecionado,
+                        "title":nome_selecionado,
+                        "price":preço_selecionado,
+                        "description":descrição_selecionada,
+                    },
+                    success: function(){
+                        alert("Produto deletado")
+                        listar()
+                    },
+                    error: function(){
+                        alert('ERROR 404')
+                    }
+                })
+            })
+        }
+
+    </script>
+</body>
+</html>
