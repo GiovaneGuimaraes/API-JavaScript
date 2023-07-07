@@ -13,7 +13,7 @@ Editar produto:
 ![4](https://github.com/GiovaneGuimaraes/API-JavaScript/assets/133304083/4fb8e783-e97c-4719-a0d5-b33e8e6a0a40)
 
 
-Recursos e Funcionalidades:
+# Recursos e Funcionalidades:
 - Formulário de cadastro de produtos com campos para nome, preço e descrição.
 - Exibição dos produtos cadastrados em uma tabela, mostrando o nome, preço e opções de edição e exclusão.
 - Possibilidade de editar os dados de um produto, preenchendo um formulário de edição dinâmico com os dados existentes.
@@ -21,7 +21,7 @@ Recursos e Funcionalidades:
 - Comunicação com uma API RESTful por meio de requisições AJAX para realizar operações de criação, leitura, atualização e exclusão de produtos.
 - Exibição de mensagens de sucesso ou erro ao realizar as operações.
 
-  Tecnologias Utilizadas:
+# Tecnologias Utilizadas:
 
 - JavaScript
 - HTML
